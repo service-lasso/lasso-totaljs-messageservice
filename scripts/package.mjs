@@ -84,8 +84,7 @@ export async function packageMessageService(platform = targetPlatform, version =
       {
         serviceId: "totaljs-messageservice",
         upstream: {
-          source: "TypeRefinery donor service",
-          donorPath: "services/totaljs-messageservice",
+          source: "Total.js Message Service",
           version,
         },
         packagedBy: "service-lasso/lasso-totaljs-messageservice",

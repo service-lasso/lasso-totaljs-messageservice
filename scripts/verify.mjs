@@ -1,6 +1,6 @@
 import { spawn, spawnSync } from "node:child_process";
 import { existsSync } from "node:fs";
-import { mkdir, rm } from "node:fs/promises";
+import { mkdir, readFile, rm } from "node:fs/promises";
 import http from "node:http";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
@@ -10,6 +10,21 @@ const repoRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), ".."
 const serviceVersion = process.env.TOTALJS_MESSAGESERVICE_VERSION ?? "12.0.0";
 const targetPlatform = process.env.TARGET_PLATFORM ?? process.platform;
 const verifyPort = Number(process.env.VERIFY_PORT ?? 18112);
+
+const serviceManifest = JSON.parse(await readFile(path.join(repoRoot, "service.json"), "utf8"));
+if (
+  serviceManifest.id !== "totaljs-messageservice" ||
+  serviceManifest.execservice !== "@node" ||
+  serviceManifest.artifact?.kind !== "archive" ||
+  serviceManifest.artifact.platforms?.[targetPlatform]?.assetName !== archiveName(targetPlatform) ||
+  serviceManifest.artifact.platforms?.[targetPlatform]?.archiveType !== (targetPlatform === "win32" ? "zip" : "tar.gz") ||
+  serviceManifest.ports?.service !== 8112 ||
+  serviceManifest.healthcheck?.type !== "http" ||
+  serviceManifest.healthcheck?.expected_status !== 404 ||
+  !serviceManifest.depend_on?.includes("@node")
+) {
+  throw new Error(`Total.js Message Service manifest drifted from current Service Lasso schema: ${JSON.stringify(serviceManifest)}`);
+}
 
 function run(command, args, options = {}) {
   const result = spawnSync(command, args, {
