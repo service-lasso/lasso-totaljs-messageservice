@@ -5,10 +5,28 @@
   "description": "Total.js TMS server packaged for Service Lasso.",
   "version": "12.0.0",
   "enabled": true,
-  "status": "30",
-  "icon": "pi pi-globe",
-  "servicelocation": 10,
+  "execservice": "@node",
+  "ports": {
+    "service": 8112
+  },
+  "env": {
+    "NODE_ENV": "production",
+    "MESSAGESERVICE_PORT": "${SERVICE_PORT}",
+    "MESSAGESERVICE_URL": "http://127.0.0.1:${SERVICE_PORT}"
+  },
+  "globalenv": {
+    "MESSAGESERVICE_URL": "${MESSAGESERVICE_URL}",
+    "MESSAGESERVICE_PORT": "${MESSAGESERVICE_PORT}"
+  },
+  "urls": [
+    {
+      "label": "Total.js Message Service",
+      "url": "${MESSAGESERVICE_URL}/",
+      "kind": "local"
+    }
+  ],
   "artifact": {
+    "kind": "archive",
     "source": {
       "type": "github-release",
       "repo": "service-lasso/lasso-totaljs-messageservice",
@@ -16,60 +34,42 @@
     },
     "platforms": {
       "win32": {
-        "asset": "lasso-totaljs-messageservice-12.0.0-win32.zip",
-        "archive": "zip",
+        "assetName": "lasso-totaljs-messageservice-12.0.0-win32.zip",
+        "archiveType": "zip",
         "command": "./lasso-totaljs-messageservice.mjs"
       },
       "linux": {
-        "asset": "lasso-totaljs-messageservice-12.0.0-linux.tar.gz",
-        "archive": "tar.gz",
+        "assetName": "lasso-totaljs-messageservice-12.0.0-linux.tar.gz",
+        "archiveType": "tar.gz",
         "command": "./lasso-totaljs-messageservice.mjs"
       },
       "darwin": {
-        "asset": "lasso-totaljs-messageservice-12.0.0-darwin.tar.gz",
-        "archive": "tar.gz",
+        "assetName": "lasso-totaljs-messageservice-12.0.0-darwin.tar.gz",
+        "archiveType": "tar.gz",
         "command": "./lasso-totaljs-messageservice.mjs"
       }
     }
   },
-  "execconfig": {
-    "debuglog": true,
-    "execservice": {
-      "id": "@node"
-    },
-    "commandline": {
-      "win32": "${SERVICE_ARTIFACT_ROOT}/lasso-totaljs-messageservice.mjs",
-      "linux": "${SERVICE_ARTIFACT_ROOT}/lasso-totaljs-messageservice.mjs",
-      "darwin": "${SERVICE_ARTIFACT_ROOT}/lasso-totaljs-messageservice.mjs",
-      "default": "${SERVICE_ARTIFACT_ROOT}/lasso-totaljs-messageservice.mjs"
-    },
-    "env": {
-      "NODE_ENV": "production",
-      "MESSAGESERVICE_PORT": "${SERVICE_PORT}",
-      "MESSAGESERVICE_URL": "http://127.0.0.1:${SERVICE_PORT}"
-    },
-    "globalenv": {
-      "MESSAGESERVICE_URL": "http://127.0.0.1:${SERVICE_PORT}",
-      "MESSAGESERVICE_PORT": "${SERVICE_PORT}"
-    },
-    "serviceport": 8112,
-    "healthcheck": {
-      "type": "http",
-      "url": "http://127.0.0.1:${SERVICE_PORT}/",
-      "expected_status": 404,
-      "retries": 180,
-      "interval_ms": 500
-    },
-    "depend_on": [
-      "@node"
-    ]
+  "commandline": {
+    "win32": "${SERVICE_ARTIFACT_ROOT}/lasso-totaljs-messageservice.mjs",
+    "linux": "${SERVICE_ARTIFACT_ROOT}/lasso-totaljs-messageservice.mjs",
+    "darwin": "${SERVICE_ARTIFACT_ROOT}/lasso-totaljs-messageservice.mjs",
+    "default": "${SERVICE_ARTIFACT_ROOT}/lasso-totaljs-messageservice.mjs"
   },
+  "healthcheck": {
+    "type": "http",
+    "url": "http://127.0.0.1:${SERVICE_PORT}/",
+    "expected_status": 404,
+    "retries": 180,
+    "interval": 500
+  },
+  "depend_on": [
+    "@node"
+  ],
   "updates": {
-    "policy": "notify",
-    "source": {
-      "type": "github-release",
-      "repo": "service-lasso/lasso-totaljs-messageservice",
-      "channel": "latest"
-    }
+    "enabled": true,
+    "mode": "notify",
+    "track": "latest",
+    "checkIntervalSeconds": 86400
   }
 }

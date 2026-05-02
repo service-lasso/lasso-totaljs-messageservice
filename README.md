@@ -1,6 +1,6 @@
 # lasso-totaljs-messageservice
 
-Service Lasso package repo for the TypeRefinery Total.js Message Service donor app.
+Service Lasso package repo for the Total.js Message Service app.
 
 The release pipeline packages the app with production `npm` dependencies already installed, publishes OS-specific archives, and publishes the matching `service.json` manifest.
 
