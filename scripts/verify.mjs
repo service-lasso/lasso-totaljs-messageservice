@@ -12,6 +12,7 @@ const targetPlatform = process.env.TARGET_PLATFORM ?? process.platform;
 const verifyPort = Number(process.env.VERIFY_PORT ?? 18112);
 
 const serviceManifest = JSON.parse(await readFile(path.join(repoRoot, "service.json"), "utf8"));
+const serviceHealthchecks = serviceManifest.healthchecks;
 if (
   serviceManifest.id !== "totaljs-messageservice" ||
   serviceManifest.execservice !== "@node" ||
@@ -19,8 +20,13 @@ if (
   serviceManifest.artifact.platforms?.[targetPlatform]?.assetName !== archiveName(targetPlatform) ||
   serviceManifest.artifact.platforms?.[targetPlatform]?.archiveType !== (targetPlatform === "win32" ? "zip" : "tar.gz") ||
   serviceManifest.ports?.service !== 8112 ||
-  serviceManifest.healthcheck?.type !== "http" ||
-  serviceManifest.healthcheck?.expected_status !== 404 ||
+  "healthcheck" in serviceManifest ||
+  !Array.isArray(serviceHealthchecks) ||
+  serviceHealthchecks.length !== 1 ||
+  serviceHealthchecks[0]?.id !== "http-root-ready" ||
+  serviceHealthchecks[0]?.type !== "http" ||
+  serviceHealthchecks[0]?.url !== "http://127.0.0.1:${SERVICE_PORT}/" ||
+  serviceHealthchecks[0]?.expected_status !== 404 ||
   !serviceManifest.depend_on?.includes("@node")
 ) {
   throw new Error(`Total.js Message Service manifest drifted from current Service Lasso schema: ${JSON.stringify(serviceManifest)}`);
@@ -91,7 +97,7 @@ async function waitForHealth(url, expectedStatus) {
     await new Promise((resolve) => setTimeout(resolve, 500));
   }
 
-  throw lastError ?? new Error("healthcheck timed out");
+  throw lastError ?? new Error("healthchecks[] readiness timed out");
 }
 
 const archivePath = await packageMessageService(targetPlatform, serviceVersion);
@@ -116,7 +122,7 @@ const child = spawn(process.execPath, [path.join(extractRoot, "lasso-totaljs-mes
 
 try {
   await waitForHealth(`http://127.0.0.1:${verifyPort}/`, 404);
-  console.log(`[lasso-totaljs-messageservice] verified healthcheck on port ${verifyPort}`);
+  console.log(`[lasso-totaljs-messageservice] verified healthchecks[] on port ${verifyPort}`);
 } finally {
   child.kill("SIGTERM");
 }
