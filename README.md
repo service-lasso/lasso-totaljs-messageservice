@@ -9,7 +9,7 @@ The release pipeline packages the app with production `npm` dependencies already
 - Service id: `totaljs-messageservice`
 - Runtime dependency: `@node`
 - Default port: `8112`
-- Healthcheck: `GET /` must return `404`
+- Healthchecks: `http-root-ready` runs `GET /` and expects `404`
 - Global environment exported to dependants:
   - `MESSAGESERVICE_URL=http://127.0.0.1:${SERVICE_PORT}`
   - `MESSAGESERVICE_PORT=${SERVICE_PORT}`

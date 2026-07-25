@@ -56,13 +56,16 @@
     "darwin": "${SERVICE_ARTIFACT_ROOT}/lasso-totaljs-messageservice.mjs",
     "default": "${SERVICE_ARTIFACT_ROOT}/lasso-totaljs-messageservice.mjs"
   },
-  "healthcheck": {
-    "type": "http",
-    "url": "http://127.0.0.1:${SERVICE_PORT}/",
-    "expected_status": 404,
-    "retries": 180,
-    "interval": 500
-  },
+  "healthchecks": [
+    {
+      "id": "http-root-ready",
+      "type": "http",
+      "url": "http://127.0.0.1:${SERVICE_PORT}/",
+      "expected_status": 404,
+      "retries": 180,
+      "interval": 500
+    }
+  ],
   "depend_on": [
     "@node"
   ],
